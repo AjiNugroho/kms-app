@@ -4,6 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import {
   Baby,
+  ChartArea,
   LayoutDashboard,
   Shield,
   Users,
@@ -30,6 +31,11 @@ const navItems: NavItem[] = [
     url: "/",
     icon: <LayoutDashboard />,
     exact: true,
+  },
+  {
+    title: "Data Statistik",
+    url: "/analytics",
+    icon: <ChartArea />,
   },
   {
     title: "Data Anak",

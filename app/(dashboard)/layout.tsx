@@ -6,6 +6,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default async function DashboardLayout({
   children,
@@ -26,6 +27,9 @@ export default async function DashboardLayout({
           <span className="text-sm text-slate-500 dark:text-slate-400">
             Sistem Pemantauan Tumbuh Kembang Anak
           </span>
+          <div className="ml-auto">
+            <ThemeToggle />
+          </div>
         </header>
 
         {/* Page content */}

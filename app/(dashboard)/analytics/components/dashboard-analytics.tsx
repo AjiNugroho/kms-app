@@ -57,5 +57,5 @@ export async function DistributionTable() {
     }
   })
 
-  return <AgeGroupTable title="Distribusi Usia" groups={groups} cardClassName="w-fit" />
+  return <AgeGroupTable title="Distribusi Usia" groups={groups} cardClassName="w-full lg:w-fit" />
 }
