@@ -1,10 +1,22 @@
+import Link from "next/link"
 import { headers } from "next/headers"
 import { asc } from "drizzle-orm"
-import { UsersIcon, TrendingUpIcon, TrendingDownIcon, AlertTriangleIcon, RulerIcon } from "lucide-react"
+import {
+  UsersIcon,
+  TrendingUpIcon,
+  TrendingDownIcon,
+  AlertTriangleIcon,
+  RulerIcon,
+  ClipboardPlusIcon,
+  ChartAreaIcon,
+  BookOpenIcon,
+  TriangleAlertIcon,
+  ChevronRightIcon,
+} from "lucide-react"
 import { auth } from "@/lib/auth"
 import { db } from "@/db/drizzle"
 import { children, childGrowth } from "@/db/auth-schema"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
 import {
   WHO_WEIGHT_BOYS,
   WHO_WEIGHT_GIRLS,
@@ -83,6 +95,49 @@ async function getStats() {
   return { total: allChildren.length, increased, decreased, bgm, stunting }
 }
 
+const menuItems = [
+  {
+    label: "KMS Input",
+    description: "Input data pertumbuhan anak",
+    href: "/kms-input",
+    icon: ClipboardPlusIcon,
+    iconBg: "bg-emerald-100 dark:bg-emerald-950",
+    iconColor: "text-emerald-600 dark:text-emerald-400",
+  },
+  {
+    label: "Rekapan",
+    description: "Rekap data pertumbuhan anak",
+    href: "/analytics",
+    icon: ChartAreaIcon,
+    iconBg: "bg-blue-100 dark:bg-blue-950",
+    iconColor: "text-blue-600 dark:text-blue-400",
+  },
+  {
+    label: "Data Anak",
+    description: "Daftar dan profil anak binaan",
+    href: "/children",
+    icon: UsersIcon,
+    iconBg: "bg-violet-100 dark:bg-violet-950",
+    iconColor: "text-violet-600 dark:text-violet-400",
+  },
+  {
+    label: "Kunjungan",
+    description: "Anak kebutuhan kunjungan",
+    href: "/children-visit",
+    icon: TriangleAlertIcon,
+    iconBg: "bg-rose-100 dark:bg-rose-950",
+    iconColor: "text-rose-600 dark:text-rose-400",
+  },
+  {
+    label: "Buku Kader",
+    description: "Buku panduan kader posyandu",
+    href: "/guide-book",
+    icon: BookOpenIcon,
+    iconBg: "bg-amber-100 dark:bg-amber-950",
+    iconColor: "text-amber-600 dark:text-amber-400",
+  },
+]
+
 export default async function EntryPage() {
   const session = await auth.api.getSession({ headers: await headers() })
   const name = session?.user?.name ?? "Kader"
@@ -139,37 +194,32 @@ export default async function EntryPage() {
     <div>
       {/* ── Mobile: full-bleed hero header ── */}
       <div className="lg:hidden -mx-6 -mt-6 bg-primary px-6 pb-8 pt-8 text-primary-foreground">
-        {/* Greeting */}
         <div className="mb-8">
-            <p>{greeting},</p>
-          <h1 className="text-2xl font-semibold">
-             {name}!
-          </h1>
-          
+          <p>{greeting},</p>
+          <h1 className="text-2xl font-semibold">{name}!</h1>
           <p className="mt-1 text-sm opacity-70">
             Ringkasan tumbuh kembang anak binaan Anda.
           </p>
         </div>
 
-        {/* Stats menu bar */}
         <Card className="bg-card/15">
-            <CardHeader>
-                <CardDescription className="text-primary-foreground">
-                    Posyandu bulan ini
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="px-0">
-                <div className="grid grid-cols-5 gap-1 w-full">
-                {stats.map((s) => (
-                    <div key={s.mobileLabel} className="flex flex-col items-center gap-1.5 text-primary-foreground">
-                        <span className="text-2xl  font-bold leading-none">{s.value}</span>
-                        <span className="text-center text-[10px] leading-tight opacity-75">
-                            {s.mobileLabel}
-                        </span>
-                    </div>
-                ))}
+          <CardHeader>
+            <CardDescription className="text-primary-foreground">
+              Posyandu bulan ini
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="px-0">
+            <div className="grid grid-cols-5 gap-1 w-full">
+              {stats.map((s) => (
+                <div key={s.mobileLabel} className="flex flex-col items-center gap-1.5 text-primary-foreground">
+                  <span className="text-2xl font-bold leading-none">{s.value}</span>
+                  <span className="text-center text-[10px] leading-tight opacity-75">
+                    {s.mobileLabel}
+                  </span>
                 </div>
-            </CardContent>
+              ))}
+            </div>
+          </CardContent>
         </Card>
       </div>
 
@@ -188,7 +238,7 @@ export default async function EntryPage() {
           {stats.map((s) => (
             <Card key={s.label}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">{s.label}</CardTitle>
+                <p className="text-sm font-medium text-muted-foreground">{s.label}</p>
                 <div className={`flex size-8 items-center justify-center rounded-lg ${s.bg}`}>
                   <s.icon className={`size-4 ${s.color}`} />
                 </div>
@@ -197,6 +247,53 @@ export default async function EntryPage() {
                 <p className={`text-3xl font-bold ${s.color}`}>{s.value}</p>
               </CardContent>
             </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Menu: mobile app-launcher style ── */}
+      <div className="mt-8 lg:hidden">
+        <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          Menu
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          {menuItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex items-center gap-4 rounded-2xl border bg-card p-4 transition-colors active:bg-muted"
+            >
+              <div className={`flex size-14 shrink-0 items-center justify-center rounded-2xl ${item.iconBg}`}>
+                <item.icon className={`size-7 ${item.iconColor}`} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                <p className="mt-0.5 text-xs leading-tight text-muted-foreground">{item.description}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Menu: desktop card list ── */}
+      <div className="mt-8 hidden lg:block">
+        <p className="mb-4 text-sm font-semibold text-muted-foreground">Menu Cepat</p>
+        <div className="grid grid-cols-3 gap-3 xl:grid-cols-5">
+          {menuItems.map((item) => (
+            <Link key={item.href} href={item.href} className="group">
+              <Card className="transition-shadow hover:shadow-md">
+                <CardContent className="flex items-center gap-3 p-4">
+                  <div className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${item.iconBg}`}>
+                    <item.icon className={`size-5 ${item.iconColor}`} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{item.label}</p>
+                    <p className="truncate text-xs text-muted-foreground">{item.description}</p>
+                  </div>
+                  <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5" />
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       </div>

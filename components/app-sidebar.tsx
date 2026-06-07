@@ -4,9 +4,12 @@ import * as React from "react"
 import Link from "next/link"
 import {
   Baby,
+  BookOpen,
   ChartArea,
+  ClipboardPlus,
   LayoutDashboard,
   Shield,
+  TriangleAlert,
   Users,
 } from "lucide-react"
 
@@ -38,9 +41,24 @@ const navItems: NavItem[] = [
     icon: <ChartArea />,
   },
   {
+    title: "KMS Input",
+    url: "/kms-input",
+    icon: <ClipboardPlus />,
+  },
+  {
     title: "Data Anak",
     url: "/children",
     icon: <Users />,
+  },
+  {
+    title: "Perhatian Khusus",
+    url: "/children-visit",
+    icon: <TriangleAlert />,
+  },
+  {
+    title: "Buku Panduan",
+    url: "/guide-book",
+    icon: <BookOpen />,
   },
   {
     title: "Admin",
