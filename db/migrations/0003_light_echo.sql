@@ -1,0 +1,1 @@
+ALTER TABLE "children" ADD COLUMN "gender" text NOT NULL;

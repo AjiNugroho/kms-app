@@ -1,11 +1,17 @@
-import React from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ChildrenTable } from "./components/children-table"
 
-const page = () => {
+export default function ChildrenPage() {
   return (
-    <div>
-      Anak anak
+    <div className="p-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Data Anak</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ChildrenTable />
+        </CardContent>
+      </Card>
     </div>
   )
 }
-
-export default page

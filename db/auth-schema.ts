@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, index, date, numeric, unique, integer } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -99,9 +99,100 @@ export const accountRelations = relations(account, ({ one }) => ({
   }),
 }));
 
+export const children = pgTable(
+  "children",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    bornDate: date("born_date").notNull(),
+    fatherName: text("father_name").notNull(),
+    motherName: text("mother_name").notNull(),
+    address: text("address").notNull(),
+    gender: text("gender", { enum: ["laki-laki", "perempuan"] }).notNull(),
+    bornWeight: numeric("born_weight", { precision: 5, scale: 2 }).notNull(),
+    bornLength: numeric("born_length", { precision: 5, scale: 2 }).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    unique("children_name_father_mother_unique").on(
+      table.name,
+      table.fatherName,
+      table.motherName
+    ),
+  ]
+);
+
+export const childGrowth = pgTable(
+  "child_growth",
+  {
+    id: text("id").primaryKey(),
+    childId: text("child_id")
+      .notNull()
+      .references(() => children.id, { onDelete: "cascade" }),
+    month: integer("month").notNull(), // pure counter: 1, 2, 3...
+    weight: numeric("weight", { precision: 5, scale: 2 }),
+    length: numeric("length", { precision: 5, scale: 2 }),
+    headCircumference: numeric("head_circumference", { precision: 5, scale: 2 }),
+    status: text("status", { enum: ["up", "down", "stale"] }),
+    note: text("note"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("child_growth_child_id_idx").on(table.childId),
+    unique("child_growth_child_month_unique").on(table.childId, table.month),
+  ]
+);
+
+export const childImmunization = pgTable(
+  "child_immunization",
+  {
+    id: text("id").primaryKey(),
+    childId: text("child_id")
+      .notNull()
+      .references(() => children.id, { onDelete: "cascade" }),
+    type: text("type", { enum: ["vitamin", "vaksin"] }).notNull(),
+    name: text("name").notNull(),
+    date: date("date").notNull(),
+    note: text("note"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("child_immunization_child_id_idx").on(table.childId)]
+);
+
+export const childrenRelations = relations(children, ({ many }) => ({
+  growth: many(childGrowth),
+  immunizations: many(childImmunization),
+}));
+
+export const childGrowthRelations = relations(childGrowth, ({ one }) => ({
+  child: one(children, { fields: [childGrowth.childId], references: [children.id] }),
+}));
+
+export const childImmunizationRelations = relations(childImmunization, ({ one }) => ({
+  child: one(children, {
+    fields: [childImmunization.childId],
+    references: [children.id],
+  }),
+}));
+
 export const schema = {
   user,
   session,
   account,
-  verification
+  verification,
+  children,
+  childGrowth,
+  childImmunization,
 }
