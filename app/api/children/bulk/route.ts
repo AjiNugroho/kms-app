@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
   const toInsert = rows
     .map((row) => {
       const rawGender = String(row["Jenis Kelamin"] ?? "").trim().toLowerCase()
-      const gender = rawGender === "perempuan" ? "perempuan" : "laki-laki"
+      const gender = (rawGender === "perempuan" ? "perempuan" : "laki-laki") as "perempuan" | "laki-laki"
       return {
         id: crypto.randomUUID(),
         name: String(row["Nama"] ?? "").trim(),

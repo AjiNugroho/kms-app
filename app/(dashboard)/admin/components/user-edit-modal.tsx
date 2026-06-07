@@ -37,8 +37,8 @@ import { type UserShown } from "../datahooks/useUserAdminList"
 
 const schema = z.object({
   name: z.string().min(1, "Nama wajib diisi"),
-  email: z.string().email("Format email tidak valid"),
-  role: z.enum(["user", "admin"]),
+  email: z.email("Format email tidak valid"),
+  role: z.enum(["kader", "normaluser"]),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -52,12 +52,12 @@ type Props = {
 export function UserEditModal({ user, open, onOpenChange }: Props) {
   const queryClient = useQueryClient()
 
-  const form = useForm<FormValues>({
+  const form = useForm<FormValues, unknown, FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: user.name,
       email: user.email,
-      role: user.role === "admin" ? "admin" : "user",
+      role: user.role as FormValues["role"],
     },
   })
 
@@ -66,7 +66,7 @@ export function UserEditModal({ user, open, onOpenChange }: Props) {
       form.reset({
         name: user.name,
         email: user.email,
-        role: user.role === "admin" ? "admin" : "user",
+        role: user.role as FormValues["role"],
       })
     }
   }, [open, user, form])
@@ -145,8 +145,8 @@ export function UserEditModal({ user, open, onOpenChange }: Props) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="user">User</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="kader">Kader</SelectItem>
+                      <SelectItem value="normaluser">Normal User</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
