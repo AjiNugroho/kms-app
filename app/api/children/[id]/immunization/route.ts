@@ -6,7 +6,7 @@ import { db } from "@/db/drizzle"
 import { childImmunization } from "@/db/auth-schema"
 
 const immunizationSchema = z.object({
-  type: z.enum(["vitamin", "vaksin"], { error: "Jenis wajib dipilih" }),
+  type: z.enum(["vitamin", "vaksin", "obat"], { error: "Jenis wajib dipilih" }),
   name: z.string().min(1, "Nama wajib diisi"),
   date: z.string().min(1, "Tanggal wajib diisi"),
   note: z.string().nullable().optional(),

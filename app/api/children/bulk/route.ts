@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
         address: String(row["Alamat"] ?? "").trim(),
         bornWeight: String(Number(row["Berat Lahir (kg)"] ?? 0)),
         bornLength: String(Number(row["Panjang Lahir (cm)"] ?? 0)),
+        bornCircumference: String(Number(row["Lingkar Kepala Lahir (cm)"] ?? 0)),
       }
     })
     .filter((r) => r.name && r.fatherName && r.motherName && r.bornDate)

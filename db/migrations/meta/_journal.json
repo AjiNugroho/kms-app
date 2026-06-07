@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1779596195351,
-      "tag": "0000_keen_dakota_north",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1779596511991,
-      "tag": "0001_lovely_imperial_guard",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1780308645719,
-      "tag": "0002_puzzling_catseye",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1780309389568,
-      "tag": "0003_light_echo",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1780311072982,
-      "tag": "0004_milky_colonel_america",
+      "when": 1780798436462,
+      "tag": "0000_ordinary_the_call",
       "breakpoints": true
     }
   ]

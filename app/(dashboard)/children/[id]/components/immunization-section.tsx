@@ -99,8 +99,8 @@ export function ImmunizationSection({ childId }: Props) {
                 <TableRow key={record.id}>
                   <TableCell>{formatDate(record.date)}</TableCell>
                   <TableCell>
-                    <Badge variant={record.type === "vitamin" ? "secondary" : "outline"}>
-                      {record.type === "vitamin" ? "Vitamin" : "Vaksin"}
+                    <Badge variant={record.type === "vitamin" ? "secondary" : record.type === "obat" ? "destructive" : "outline"}>
+                      {record.type === "vitamin" ? "Vitamin" : record.type === "obat" ? "Obat" : "Vaksin"}
                     </Badge>
                   </TableCell>
                   <TableCell className="font-medium">{record.name}</TableCell>

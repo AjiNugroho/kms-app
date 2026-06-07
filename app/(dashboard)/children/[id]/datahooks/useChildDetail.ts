@@ -31,7 +31,7 @@ export type GrowthInput = {
 export type ImmunizationRecord = {
   id: string
   childId: string
-  type: 'vitamin' | 'vaksin'
+  type: 'vitamin' | 'vaksin' | 'obat'
   name: string
   date: string
   note: string | null
@@ -40,7 +40,7 @@ export type ImmunizationRecord = {
 }
 
 export type ImmunizationInput = {
-  type: 'vitamin' | 'vaksin'
+  type: 'vitamin' | 'vaksin' | 'obat'
   name: string
   date: string
   note?: string | null

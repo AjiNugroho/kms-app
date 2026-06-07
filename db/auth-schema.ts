@@ -111,6 +111,7 @@ export const children = pgTable(
     gender: text("gender", { enum: ["laki-laki", "perempuan"] }).notNull(),
     bornWeight: numeric("born_weight", { precision: 5, scale: 2 }).notNull(),
     bornLength: numeric("born_length", { precision: 5, scale: 2 }).notNull(),
+    bornCircumference: numeric("born_circumference", { precision: 5, scale: 2 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -158,7 +159,7 @@ export const childImmunization = pgTable(
     childId: text("child_id")
       .notNull()
       .references(() => children.id, { onDelete: "cascade" }),
-    type: text("type", { enum: ["vitamin", "vaksin"] }).notNull(),
+    type: text("type", { enum: ["vitamin", "vaksin", "obat"] }).notNull(),
     name: text("name").notNull(),
     date: date("date").notNull(),
     note: text("note"),

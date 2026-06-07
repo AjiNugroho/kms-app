@@ -1,11 +1,19 @@
-import React from 'react'
+import { SummarySection, DistributionTable } from "./components/dashboard-analytics"
+import { AdvancedAnalytics } from "./components/advanced-analytics"
 
-const page = () => {
+export default function HomePage() {
   return (
-    <div>
-      home
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-semibold">Dashboard</h1>
+      <SummarySection />
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        <div className="flex-none">
+          <DistributionTable />
+        </div>
+        <div className="min-w-0 flex-1">
+          <AdvancedAnalytics />
+        </div>
+      </div>
     </div>
   )
 }
-
-export default page

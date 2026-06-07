@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useMemo, useState } from "react"
+import { useRef, useMemo, useState, useEffect } from "react"
 import {
   LineChart,
   Line,
@@ -18,7 +18,14 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useChildGrowth, useUploadGrowth } from "../datahooks/useChildDetail"
 import { useChildById } from "../datahooks/useChildDetail"
 import { getWhoData, type WhoGender } from "../datahooks/who-standards"
@@ -65,6 +72,32 @@ export function GrowthSection({ childId }: Props) {
 
   const [activeTab, setActiveTab] = useState<TabKey>('weight')
   const [zoom, setZoom] = useState<ZoomState>(defaultZoom)
+  const [isMobile, setIsMobile] = useState(false)
+  const isSelectingRef = useRef(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
+  useEffect(() => {
+    function onMouseUp() {
+      if (!isSelectingRef.current) return
+      isSelectingRef.current = false
+      setZoom((z) => {
+        const { refAreaLeft, refAreaRight } = z
+        if (refAreaLeft != null && refAreaRight != null && refAreaLeft !== refAreaRight) {
+          const [l, r] = [refAreaLeft, refAreaRight].sort((a, b) => a - b) as [number, number]
+          return { refAreaLeft: null, refAreaRight: null, isSelecting: false, domain: [l, r] }
+        }
+        return { ...z, refAreaLeft: null, refAreaRight: null, isSelecting: false }
+      })
+    }
+    document.addEventListener('mouseup', onMouseUp)
+    return () => document.removeEventListener('mouseup', onMouseUp)
+  }, [])
 
   const gender: WhoGender = child?.gender === 'perempuan' ? 'perempuan' : 'laki-laki'
 
@@ -130,23 +163,16 @@ export function GrowthSection({ childId }: Props) {
 
   function handleMouseDown(e: { activeLabel?: string | number } | null) {
     const val = parseLabel(e?.activeLabel)
-    if (val != null) setZoom((z) => ({ ...z, refAreaLeft: val, isSelecting: true }))
+    if (val == null) return
+    isSelectingRef.current = true
+    setZoom((z) => ({ ...z, refAreaLeft: val, refAreaRight: null, isSelecting: true }))
   }
 
   function handleMouseMove(e: { activeLabel?: string | number } | null) {
-    if (!zoom.isSelecting) return
+    if (!isSelectingRef.current) return
     const val = parseLabel(e?.activeLabel)
-    if (val != null) setZoom((z) => ({ ...z, refAreaRight: val }))
-  }
-
-  function handleMouseUp() {
-    const { refAreaLeft, refAreaRight } = zoom
-    if (refAreaLeft != null && refAreaRight != null && refAreaLeft !== refAreaRight) {
-      const [l, r] = [refAreaLeft, refAreaRight].sort((a, b) => a - b) as [number, number]
-      setZoom({ refAreaLeft: null, refAreaRight: null, isSelecting: false, domain: [l, r] })
-    } else {
-      setZoom((z) => ({ ...z, refAreaLeft: null, refAreaRight: null, isSelecting: false }))
-    }
+    if (val == null) return
+    setZoom((z) => ({ ...z, refAreaRight: val }))
   }
 
   function resetZoom() {
@@ -191,13 +217,12 @@ export function GrowthSection({ childId }: Props) {
     }
 
     return (
-      <div className="h-80 w-full">
+      <div className="h-120 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={data}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
             style={{ userSelect: "none" }}
             margin={{ top: 5, right: 16, left: 0, bottom: 20 }}
           >
@@ -224,19 +249,21 @@ export function GrowthSection({ childId }: Props) {
                 return [`${value} ${unit}`, label] as [string, string]
               }}
             />
-            <Legend
-              formatter={(value: string) => {
-                const labelMap: Record<string, string> = {
-                  value: `Nilai Anak`,
-                  sd3neg: "WHO -3SD",
-                  sd2neg: "WHO -2SD",
-                  sd0: "WHO Median",
-                  sd2: "WHO +2SD",
-                  sd3: "WHO +3SD",
-                }
-                return labelMap[value] ?? value
-              }}
-            />
+            {!isMobile && (
+              <Legend
+                formatter={(value: string) => {
+                  const labelMap: Record<string, string> = {
+                    value: `Nilai Anak`,
+                    sd3neg: "WHO -3SD",
+                    sd2neg: "WHO -2SD",
+                    sd0: "WHO Median",
+                    sd2: "WHO +2SD",
+                    sd3: "WHO +3SD",
+                  }
+                  return labelMap[value] ?? value
+                }}
+              />
+            )}
 
             {/* WHO reference lines */}
             <Line type="monotone" dataKey="sd3neg" stroke="#ef4444" strokeWidth={1} strokeDasharray="4 3" dot={false} />
@@ -318,14 +345,26 @@ export function GrowthSection({ childId }: Props) {
         )}
         {!isLoading && !isError && (
           <Tabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="mb-4">
+            {/* Desktop */}
+            <TabsList className="mb-4 hidden sm:flex">
               <TabsTrigger value="weight">Berat Badan</TabsTrigger>
               <TabsTrigger value="height">Tinggi Badan</TabsTrigger>
               <TabsTrigger value="head">Lingkar Kepala</TabsTrigger>
             </TabsList>
-            <TabsContent value="weight">{renderChart('weight')}</TabsContent>
-            <TabsContent value="height">{renderChart('height')}</TabsContent>
-            <TabsContent value="head">{renderChart('head')}</TabsContent>
+            {/* Mobile */}
+            <div className="mb-4 sm:hidden">
+              <Select value={activeTab} onValueChange={handleTabChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="weight">Berat Badan</SelectItem>
+                  <SelectItem value="height">Tinggi Badan</SelectItem>
+                  <SelectItem value="head">Lingkar Kepala</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {renderChart(activeTab)}
           </Tabs>
         )}
       </CardContent>

@@ -134,6 +134,10 @@ export function ChildrenTable() {
         header: "PB Lahir (cm)",
         cell: (info) => parseFloat(info.getValue()).toFixed(1),
       }),
+      columnHelper.accessor("bornCircumference", {
+        header: "LK Lahir (cm)",
+        cell: (info) => parseFloat(info.getValue()).toFixed(1),
+      }),
       columnHelper.display({
         id: "actions",
         header: "",
@@ -216,7 +220,7 @@ export function ChildrenTable() {
             onKeyDown={handleSearchKeyDown}
             className="w-56"
           />
-          <Button size="sm" variant="secondary" onClick={handleSearch}>
+          <Button variant="secondary" onClick={handleSearch}>
             <SearchIcon />
             Cari
           </Button>
@@ -318,7 +322,7 @@ export function ChildrenTable() {
                 "Tidak ada data"
               )}
             </p>
-            <div className="flex items-center gap-2">
+            <div className="hidden xl:flex xl:items-center gap-2">
               <span className="whitespace-nowrap">Baris per halaman:</span>
               <Select
                 value={String(pageSize)}

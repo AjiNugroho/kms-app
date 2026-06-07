@@ -34,7 +34,7 @@ import {
 import { type ImmunizationRecord, useUpdateImmunization } from "../datahooks/useChildDetail"
 
 const schema = z.object({
-  type: z.enum(["vitamin", "vaksin"], { error: "Jenis wajib dipilih" }),
+  type: z.enum(["vitamin", "vaksin", "obat"], { error: "Jenis wajib dipilih" }),
   name: z.string().min(1, "Nama wajib diisi"),
   date: z.string().min(1, "Tanggal wajib diisi"),
   note: z.string().optional(),
@@ -110,6 +110,7 @@ export function ImmunizationEditModal({ childId, record, open, onOpenChange }: P
                       <SelectContent>
                         <SelectItem value="vitamin">Vitamin</SelectItem>
                         <SelectItem value="vaksin">Vaksin</SelectItem>
+                        <SelectItem value="obat">Obat</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

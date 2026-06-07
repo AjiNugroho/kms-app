@@ -14,6 +14,7 @@ const updateSchema = z.object({
   address: z.string().min(1, "Alamat wajib diisi"),
   bornWeight: z.string().min(1, "Berat lahir wajib diisi"),
   bornLength: z.string().min(1, "Panjang lahir wajib diisi"),
+  bornCircumference: z.string().min(1, "Lingkar kepala lahir wajib diisi"),
 })
 
 function isDuplicateKeyError(e: unknown): boolean {

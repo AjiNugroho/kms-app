@@ -12,6 +12,7 @@ export type Child = {
   address: string
   bornWeight: string
   bornLength: string
+  bornCircumference: string
   createdAt: string
   updatedAt: string
 }

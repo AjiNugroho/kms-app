@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import * as XLSX from "xlsx"
+import { sql } from "drizzle-orm"
 
 import { db } from "@/db/drizzle"
 import { childGrowth } from "@/db/auth-schema"
@@ -63,11 +64,11 @@ export async function POST(
     .onConflictDoUpdate({
       target: [childGrowth.childId, childGrowth.month],
       set: {
-        weight: childGrowth.weight,
-        length: childGrowth.length,
-        headCircumference: childGrowth.headCircumference,
-        status: childGrowth.status,
-        note: childGrowth.note,
+        weight: sql`excluded.weight`,
+        length: sql`excluded.length`,
+        headCircumference: sql`excluded.head_circumference`,
+        status: sql`excluded.status`,
+        note: sql`excluded.note`,
         updatedAt: new Date(),
       },
     })

@@ -26,12 +26,13 @@ const TEMPLATE_COLUMNS = [
   "Alamat",
   "Berat Lahir (kg)",
   "Panjang Lahir (cm)",
+  "Lingkar Kepala Lahir (cm)",
 ]
 
 function downloadTemplate() {
   const ws = XLSX.utils.aoa_to_sheet([
     TEMPLATE_COLUMNS,
-    ["Budi Santoso", "2023-01-15", "laki-laki", "Andi Santoso", "Siti Rahayu", "Jl. Merdeka No. 1", "3.5", "50"],
+    ["Budi Santoso", "2023-01-15", "laki-laki", "Andi Santoso", "Siti Rahayu", "Jl. Merdeka No. 1", "3.5", "50", "33"],
   ])
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, "Data Anak")

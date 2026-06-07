@@ -50,6 +50,10 @@ const schema = z.object({
     .string()
     .min(1, "Panjang lahir wajib diisi")
     .refine((v) => !isNaN(Number(v)) && Number(v) > 0, "Harus berupa angka positif"),
+  bornCircumference: z
+    .string()
+    .min(1, "Lingkar kepala lahir wajib diisi")
+    .refine((v) => !isNaN(Number(v)) && Number(v) > 0, "Harus berupa angka positif"),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -69,6 +73,7 @@ export function ChildCreateModal() {
       address: "",
       bornWeight: "",
       bornLength: "",
+      bornCircumference: "",
     },
   })
 
@@ -195,7 +200,7 @@ export function ChildCreateModal() {
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="bornWeight"
@@ -217,6 +222,19 @@ export function ChildCreateModal() {
                     <FormLabel>Panjang Lahir (cm)</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.1" min="0" placeholder="50" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="bornCircumference"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>LK Lahir (cm)</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.1" min="0" placeholder="33" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
