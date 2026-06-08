@@ -8,12 +8,14 @@ import { ac,superadmin,kader,normaluser } from "@/lib/permission";
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
-        provider: "pg", 
+        provider: "pg",
         schema
     }),
-    emailAndPassword: { 
-        enabled: true, 
-    }, 
+    baseURL: process.env.BETTER_AUTH_URL,
+    trustedOrigins: [process.env.BETTER_AUTH_URL!],
+    emailAndPassword: {
+        enabled: true,
+    },
     plugins: [ 
         username() ,
         admin({
