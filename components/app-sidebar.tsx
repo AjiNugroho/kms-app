@@ -7,6 +7,7 @@ import {
   BookOpen,
   ChartArea,
   ClipboardPlus,
+  HouseHeart,
   LayoutDashboard,
   Shield,
   TriangleAlert,
@@ -51,9 +52,9 @@ const navItems: NavItem[] = [
     icon: <Users />,
   },
   {
-    title: "Perhatian Khusus",
+    title: "Kunjungan Rumah",
     url: "/children-visit",
-    icon: <TriangleAlert />,
+    icon: <HouseHeart />,
   },
   {
     title: "Buku Panduan",

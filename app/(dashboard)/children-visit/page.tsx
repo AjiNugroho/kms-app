@@ -7,8 +7,8 @@ import {
 } from "@/app/(dashboard)/children/[id]/datahooks/who-standards"
 import { VisitTables, type BgmChild, type NoIncreaseChild } from "./components/visit-tables"
 
-const WHO_MINUS2SD_BOYS  = new Map(WHO_WEIGHT_BOYS.map((r) => [r[0], r[2]]))
-const WHO_MINUS2SD_GIRLS = new Map(WHO_WEIGHT_GIRLS.map((r) => [r[0], r[2]]))
+const WHO_MINUS3SD_BOYS  = new Map(WHO_WEIGHT_BOYS.map((r) => [r[0], r[1]]))
+const WHO_MINUS3SD_GIRLS = new Map(WHO_WEIGHT_GIRLS.map((r) => [r[0], r[1]]))
 
 async function getWatchLists() {
   const [allChildren, allGrowth] = await Promise.all([
@@ -48,10 +48,10 @@ async function getWatchLists() {
     const records = growthByChild.get(child.id) ?? []
     if (records.length === 0) continue
 
-    const whoMap = child.gender === "laki-laki" ? WHO_MINUS2SD_BOYS : WHO_MINUS2SD_GIRLS
+    const whoMap = child.gender === "laki-laki" ? WHO_MINUS3SD_BOYS : WHO_MINUS3SD_GIRLS
     const last = records[records.length - 1]
 
-    // BGM check: latest weight < WHO -2SD
+    // BGM check: latest weight < WHO -3SD
     const threshold = whoMap.get(Math.min(60, Math.max(0, last.month)))
     if (threshold !== undefined && last.weight < threshold) {
       bgm.push({
@@ -98,9 +98,9 @@ export default async function ChildrenVisitPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Perhatian Khusus</h1>
+        <h1 className="text-2xl font-semibold">Perhatian Khusus Kunjungan Rumah</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Daftar anak yang memerlukan perhatian berdasarkan data tumbuh kembang terakhir.
+          Daftar anak yang memerlukan kunjungan rumah, baik karena berat badan di bawah -3 SD WHO atau tidak mengalami peningkatan berat badan selama 2 bulan terakhir.
         </p>
       </div>
 

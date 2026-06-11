@@ -12,6 +12,7 @@ import {
   BookOpenIcon,
   TriangleAlertIcon,
   ChevronRightIcon,
+  HouseHeartIcon,
 } from "lucide-react"
 import { auth } from "@/lib/auth"
 import { db } from "@/db/drizzle"
@@ -24,10 +25,10 @@ import {
   WHO_HEIGHT_GIRLS,
 } from "@/app/(dashboard)/children/[id]/datahooks/who-standards"
 
-const WHO_WEIGHT_MINUS2SD_BOYS  = new Map(WHO_WEIGHT_BOYS.map((r) => [r[0], r[2]]))
-const WHO_WEIGHT_MINUS2SD_GIRLS = new Map(WHO_WEIGHT_GIRLS.map((r) => [r[0], r[2]]))
-const WHO_HEIGHT_MINUS2SD_BOYS  = new Map(WHO_HEIGHT_BOYS.map((r) => [r[0], r[2]]))
-const WHO_HEIGHT_MINUS2SD_GIRLS = new Map(WHO_HEIGHT_GIRLS.map((r) => [r[0], r[2]]))
+const WHO_WEIGHT_MINUS3SD_BOYS  = new Map(WHO_WEIGHT_BOYS.map((r) => [r[0], r[1]]))
+const WHO_WEIGHT_MINUS3SD_GIRLS = new Map(WHO_WEIGHT_GIRLS.map((r) => [r[0], r[1]]))
+const WHO_HEIGHT_MINUS3SD_BOYS  = new Map(WHO_HEIGHT_BOYS.map((r) => [r[0], r[1]]))
+const WHO_HEIGHT_MINUS3SD_GIRLS = new Map(WHO_HEIGHT_GIRLS.map((r) => [r[0], r[1]]))
 
 async function getStats() {
   const [allChildren, allGrowth] = await Promise.all([
@@ -74,9 +75,9 @@ async function getStats() {
 
     if (wn >= 1) {
       const lastW = weightRecords[wn - 1]
-      const whoWeightMap = child.gender === "laki-laki" ? WHO_WEIGHT_MINUS2SD_BOYS : WHO_WEIGHT_MINUS2SD_GIRLS
-      const sd2w = whoWeightMap.get(Math.min(60, Math.max(0, lastW.month)))
-      if (sd2w !== undefined && lastW.w < sd2w) bgm++
+      const whoWeightMap = child.gender === "laki-laki" ? WHO_WEIGHT_MINUS3SD_BOYS : WHO_WEIGHT_MINUS3SD_GIRLS
+      const sd3w = whoWeightMap.get(Math.min(60, Math.max(0, lastW.month)))
+      if (sd3w !== undefined && lastW.w < sd3w) bgm++
     }
 
     const heightRecords = records
@@ -86,9 +87,9 @@ async function getStats() {
 
     if (hn >= 1) {
       const lastH = heightRecords[hn - 1]
-      const whoHeightMap = child.gender === "laki-laki" ? WHO_HEIGHT_MINUS2SD_BOYS : WHO_HEIGHT_MINUS2SD_GIRLS
-      const sd2h = whoHeightMap.get(Math.min(60, Math.max(0, lastH.month)))
-      if (sd2h !== undefined && lastH.h < sd2h) stunting++
+      const whoHeightMap = child.gender === "laki-laki" ? WHO_HEIGHT_MINUS3SD_BOYS : WHO_HEIGHT_MINUS3SD_GIRLS
+      const sd3h = whoHeightMap.get(Math.min(60, Math.max(0, lastH.month)))
+      if (sd3h !== undefined && lastH.h < sd3h) stunting++
     }
   }
 
@@ -105,8 +106,8 @@ const menuItems = [
     iconColor: "text-emerald-600 dark:text-emerald-400",
   },
   {
-    label: "Rekapan",
-    description: "Rekap data pertumbuhan anak",
+    label: "Statistic",
+    description: "Statistic data anak",
     href: "/analytics",
     icon: ChartAreaIcon,
     iconBg: "bg-blue-100 dark:bg-blue-950",
@@ -121,16 +122,16 @@ const menuItems = [
     iconColor: "text-violet-600 dark:text-violet-400",
   },
   {
-    label: "Kunjungan",
-    description: "Anak kebutuhan kunjungan",
+    label: "Kunjungan Rumah",
+    description: "Anak kebutuhan kunjungan rumah",
     href: "/children-visit",
-    icon: TriangleAlertIcon,
+    icon: HouseHeartIcon,
     iconBg: "bg-rose-100 dark:bg-rose-950",
     iconColor: "text-rose-600 dark:text-rose-400",
   },
   {
-    label: "Buku Kader",
-    description: "Buku panduan kader posyandu",
+    label: "Buku Panduan Posyandu",
+    description: "Buku panduan untuk kader posyandu",
     href: "/guide-book",
     icon: BookOpenIcon,
     iconBg: "bg-amber-100 dark:bg-amber-950",
@@ -181,7 +182,7 @@ export default async function EntryPage() {
       bg: "bg-rose-50 dark:bg-rose-950",
     },
     {
-      label: "Stunting (TB < -2 SD)",
+      label: "Stunting (TB < -3 SD)",
       mobileLabel: "Stunting",
       value: stunting,
       icon: RulerIcon,
@@ -256,7 +257,7 @@ export default async function EntryPage() {
         <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           Menu
         </p>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3">
           {menuItems.map((item) => (
             <Link
               key={item.href}

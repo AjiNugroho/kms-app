@@ -1,9 +1,17 @@
 "use client"
 
-import Link from "next/link"
-import { AlertTriangleIcon, TrendingDownIcon, ExternalLinkIcon } from "lucide-react"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { AlertTriangleIcon, TrendingDownIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -55,6 +63,7 @@ function GenderBadge({ gender }: { gender: string }) {
 }
 
 function BgmTable({ data }: { data: BgmChild[] }) {
+  const router = useRouter()
   return (
     <Table>
       <TableHeader>
@@ -64,16 +73,19 @@ function BgmTable({ data }: { data: BgmChild[] }) {
           <TableHead className="text-center">L/P</TableHead>
           <TableHead className="text-center">Usia (bln)</TableHead>
           <TableHead className="text-center">BB Terakhir</TableHead>
-          <TableHead className="text-center">Batas WHO -2SD</TableHead>
-          <TableHead />
+          <TableHead className="text-center">Batas WHO -3SD</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {data.length === 0 ? (
-          <EmptyRow message="Tidak ada anak dengan berat di bawah -2 SD WHO." />
+          <EmptyRow message="Tidak ada anak dengan berat di bawah -3 SD WHO." />
         ) : (
           data.map((c) => (
-            <TableRow key={c.id}>
+            <TableRow
+              key={c.id}
+              className="cursor-pointer"
+              onClick={() => router.push(`/children/${c.id}`)}
+            >
               <TableCell className="font-medium">{c.name}</TableCell>
               <TableCell className="text-sm text-muted-foreground">
                 {c.fatherName} / {c.motherName}
@@ -90,14 +102,6 @@ function BgmTable({ data }: { data: BgmChild[] }) {
               <TableCell className="text-center text-muted-foreground">
                 {c.threshold.toFixed(2)} kg
               </TableCell>
-              <TableCell className="text-right">
-                <Link
-                  href={`/children/${c.id}`}
-                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                >
-                  Detail <ExternalLinkIcon className="size-3" />
-                </Link>
-              </TableCell>
             </TableRow>
           ))
         )}
@@ -107,6 +111,7 @@ function BgmTable({ data }: { data: BgmChild[] }) {
 }
 
 function NoIncreaseTable({ data }: { data: NoIncreaseChild[] }) {
+  const router = useRouter()
   return (
     <Table>
       <TableHeader>
@@ -117,7 +122,6 @@ function NoIncreaseTable({ data }: { data: NoIncreaseChild[] }) {
           <TableHead className="text-center">BB Bulan Lalu</TableHead>
           <TableHead className="text-center">BB Terakhir</TableHead>
           <TableHead className="text-center">Perubahan</TableHead>
-          <TableHead />
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -127,7 +131,11 @@ function NoIncreaseTable({ data }: { data: NoIncreaseChild[] }) {
           data.map((c) => {
             const diff = c.lastWeight - c.prevWeight
             return (
-              <TableRow key={c.id}>
+              <TableRow
+                key={c.id}
+                className="cursor-pointer"
+                onClick={() => router.push(`/children/${c.id}`)}
+              >
                 <TableCell className="font-medium">{c.name}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">
                   {c.fatherName} / {c.motherName}
@@ -148,14 +156,6 @@ function NoIncreaseTable({ data }: { data: NoIncreaseChild[] }) {
                     {diff >= 0 ? "+" : ""}{diff.toFixed(2)} kg
                   </span>
                 </TableCell>
-                <TableCell className="text-right">
-                  <Link
-                    href={`/children/${c.id}`}
-                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                  >
-                    Detail <ExternalLinkIcon className="size-3" />
-                  </Link>
-                </TableCell>
               </TableRow>
             )
           })
@@ -165,6 +165,11 @@ function NoIncreaseTable({ data }: { data: NoIncreaseChild[] }) {
   )
 }
 
+const tabOptions = [
+  { value: "bgm",         label: "BGM / Di bawah -3SD WHO",  icon: AlertTriangleIcon },
+  { value: "no-increase", label: "Tidak Naik 2 Bulan",        icon: TrendingDownIcon },
+]
+
 export function VisitTables({
   bgm,
   noIncrease,
@@ -172,12 +177,40 @@ export function VisitTables({
   bgm: BgmChild[]
   noIncrease: NoIncreaseChild[]
 }) {
+  const [tab, setTab] = useState("bgm")
+  const counts: Record<string, number> = { bgm: bgm.length, "no-increase": noIncrease.length }
+
   return (
-    <Tabs defaultValue="bgm">
-      <TabsList>
+    <Tabs value={tab} onValueChange={setTab}>
+      {/* Mobile: select dropdown */}
+      <div className="md:hidden">
+        <Select value={tab} onValueChange={setTab}>
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {tabOptions.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                <span className="flex items-center gap-2">
+                  <opt.icon className="size-3.5" />
+                  {opt.label}
+                  {counts[opt.value] > 0 && (
+                    <Badge variant="destructive" className="ml-1 text-xs">
+                      {counts[opt.value]}
+                    </Badge>
+                  )}
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Desktop: tab pills */}
+      <TabsList className="hidden md:inline-flex">
         <TabsTrigger value="bgm" className="gap-2">
           <AlertTriangleIcon className="size-3.5" />
-          BGM / Di bawah -2SD WHO
+          BGM / Di bawah -3SD WHO
           {bgm.length > 0 && (
             <Badge variant="destructive" className="ml-1 text-xs">
               {bgm.length}

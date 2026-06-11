@@ -1,3 +1,4 @@
+import { Fragment } from "react"
 import { asc } from "drizzle-orm"
 import { db } from "@/db/drizzle"
 import { children, childGrowth } from "@/db/auth-schema"
@@ -5,10 +6,10 @@ import {
   WHO_WEIGHT_BOYS,
   WHO_WEIGHT_GIRLS,
 } from "@/app/(dashboard)/children/[id]/datahooks/who-standards"
-import { AgeGroupTable, type AgeGroupData } from "./age-group-table"
+import type { AgeGroupData } from "./age-group-table"
 
-const WHO_MINUS2SD_BOYS  = new Map(WHO_WEIGHT_BOYS.map((r) => [r[0], r[2]]))
-const WHO_MINUS2SD_GIRLS = new Map(WHO_WEIGHT_GIRLS.map((r) => [r[0], r[2]]))
+const WHO_MINUS3SD_BOYS  = new Map(WHO_WEIGHT_BOYS.map((r) => [r[0], r[1]]))
+const WHO_MINUS3SD_GIRLS = new Map(WHO_WEIGHT_GIRLS.map((r) => [r[0], r[1]]))
 
 const AGE_GROUPS: { label: string; min: number; max: number }[] = [
   { label: "0 – 5 bulan",   min: 0,  max: 5  },
@@ -86,9 +87,9 @@ export async function AdvancedAnalytics() {
 
     if (n >= 1) {
       const lastW = weights[n - 1]
-      const whoMap = child.gender === "laki-laki" ? WHO_MINUS2SD_BOYS : WHO_MINUS2SD_GIRLS
-      const sd2 = whoMap.get(Math.min(60, Math.max(0, lastW.month)))
-      if (sd2 !== undefined && lastW.w < sd2) m4.push(entry)
+      const whoMap = child.gender === "laki-laki" ? WHO_MINUS3SD_BOYS : WHO_MINUS3SD_GIRLS
+      const sd3 = whoMap.get(Math.min(60, Math.max(0, lastW.month)))
+      if (sd3 !== undefined && lastW.w < sd3) m4.push(entry)
     }
 
     if (n >= 3) {
@@ -108,12 +109,60 @@ export async function AdvancedAnalytics() {
   ]
 
   return (
-    <section className="space-y-4">
-      {/* <h2 className="text-lg font-semibold">Analisis Pertumbuhan</h2> */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {metrics.map((m) => (
-          <AgeGroupTable key={m.title} title={m.title} groups={m.groups} />
-        ))}
+    <section>
+      <div className="overflow-x-auto rounded-md border">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b bg-muted/50">
+              <th
+                rowSpan={2}
+                className="whitespace-nowrap px-4 py-2.5 text-left font-semibold"
+              >
+                Kategori
+              </th>
+              {AGE_GROUPS.map((g) => (
+                <th
+                  key={g.label}
+                  colSpan={2}
+                  className="border-l px-3 py-2.5 text-center font-semibold"
+                >
+                  {g.label}
+                </th>
+              ))}
+            </tr>
+            <tr className="border-b bg-muted/30">
+              {AGE_GROUPS.map((g) => (
+                <Fragment key={g.label}>
+                  <th className="border-l px-3 py-1.5 text-center text-xs font-medium text-blue-600 dark:text-blue-400">
+                    L
+                  </th>
+                  <th className="px-3 py-1.5 text-center text-xs font-medium text-rose-500 dark:text-rose-400">
+                    P
+                  </th>
+                </Fragment>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {metrics.map((m, i) => (
+              <tr key={m.title} className={i % 2 === 1 ? "bg-muted/20" : ""}>
+                <td className="whitespace-nowrap border-b px-4 py-2.5 font-medium">
+                  {m.title}
+                </td>
+                {m.groups.map((g) => (
+                  <Fragment key={g.label}>
+                    <td className="border-b border-l px-3 py-2.5 text-center font-semibold text-blue-600 dark:text-blue-400">
+                      {g.male}
+                    </td>
+                    <td className="border-b px-3 py-2.5 text-center font-semibold text-rose-500 dark:text-rose-400">
+                      {g.female}
+                    </td>
+                  </Fragment>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </section>
   )
