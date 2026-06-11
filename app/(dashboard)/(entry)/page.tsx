@@ -106,8 +106,8 @@ const menuItems = [
     iconColor: "text-emerald-600 dark:text-emerald-400",
   },
   {
-    label: "Statistic",
-    description: "Statistic data anak",
+    label: "Statistik",
+    description: "Statistik data anak",
     href: "/analytics",
     icon: ChartAreaIcon,
     iconBg: "bg-blue-100 dark:bg-blue-950",
