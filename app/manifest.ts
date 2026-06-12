@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "KMS Digital",
-    short_name: "KMS Digital",
-    description: "Sistem Monitoring Tumbuh Kembang Anak",
+    name: "SIKAGI",
+    short_name: "SIKAGI",
+    description: "Langkah Kader tingkatkan gizi balita",
     start_url: "/",
     display: "standalone",
     orientation: "portrait",

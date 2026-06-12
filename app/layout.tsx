@@ -20,13 +20,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KMS Digital",
-  description: "Sistem Monitoring Tumbuh Kembang Anak",
+  title: "SIKAGI",
+  description: "Langkah Kader tingkatkan gizi balita",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "KMS Digital",
+    title: "SIKAGI",
   },
   formatDetection: {
     telephone: false,

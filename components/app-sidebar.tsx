@@ -84,9 +84,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Baby className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">KMS Digital</span>
+                  <span className="truncate font-semibold">SIKAGI</span>
                   <span className="truncate text-xs text-sidebar-foreground/60">
-                    Tumbuh Kembang Anak
+                    Langkah Kader tingkatkan gizi balita
                   </span>
                 </div>
               </Link>

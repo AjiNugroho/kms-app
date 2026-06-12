@@ -28,7 +28,7 @@ export default async function DashboardLayout({
           {/* Mobile top app bar */}
           <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4 md:hidden">
             <SidebarTrigger className="-ml-1" />
-            <span className="flex-1 text-base font-semibold">KMS Digital</span>
+            <span className="flex-1 text-base font-semibold">SIKAGI</span>
             <ThemeToggle />
           </header>
 

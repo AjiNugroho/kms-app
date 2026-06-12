@@ -62,6 +62,10 @@ const TAB_CONFIG: Record<TabKey, { label: string; unit: string; childKey: 'weigh
   head:   { label: "Lingkar Kepala", unit: "cm", childKey: "headCircumference" },
 }
 
+// Chart layout constants — must match the LineChart margin + YAxis width props below
+const Y_AXIS_WIDTH = 40
+const CHART_MARGIN_RIGHT = 16
+
 type Props = { childId: string }
 
 export function GrowthSection({ childId }: Props) {
@@ -69,6 +73,7 @@ export function GrowthSection({ childId }: Props) {
   const { data: rawData, isLoading, isError } = useChildGrowth(childId)
   const uploadGrowth = useUploadGrowth(childId)
   const fileRef = useRef<HTMLInputElement>(null)
+  const chartWrapperRef = useRef<HTMLDivElement>(null)
 
   const [activeTab, setActiveTab] = useState<TabKey>('weight')
   const [zoom, setZoom] = useState<ZoomState>(defaultZoom)
@@ -80,23 +85,6 @@ export function GrowthSection({ childId }: Props) {
     check()
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
-  }, [])
-
-  useEffect(() => {
-    function onMouseUp() {
-      if (!isSelectingRef.current) return
-      isSelectingRef.current = false
-      setZoom((z) => {
-        const { refAreaLeft, refAreaRight } = z
-        if (refAreaLeft != null && refAreaRight != null && refAreaLeft !== refAreaRight) {
-          const [l, r] = [refAreaLeft, refAreaRight].sort((a, b) => a - b) as [number, number]
-          return { refAreaLeft: null, refAreaRight: null, isSelecting: false, domain: [l, r] }
-        }
-        return { ...z, refAreaLeft: null, refAreaRight: null, isSelecting: false }
-      })
-    }
-    document.addEventListener('mouseup', onMouseUp)
-    return () => document.removeEventListener('mouseup', onMouseUp)
   }, [])
 
   const gender: WhoGender = child?.gender === 'perempuan' ? 'perempuan' : 'laki-laki'
@@ -155,24 +143,52 @@ export function GrowthSection({ childId }: Props) {
     return all.filter((d) => d.month >= l && d.month <= r)
   }, [chartDataMap, activeTab, zoom.domain])
 
-  function parseLabel(label: string | number | undefined): number | null {
-    if (label == null) return null
-    const n = typeof label === "number" ? label : parseInt(String(label), 10)
-    return isNaN(n) ? null : n
+  // Map a clientX pixel coordinate to the nearest month value in the current dataset
+  function pointerXToMonth(clientX: number): number | null {
+    const wrapper = chartWrapperRef.current
+    if (!wrapper) return null
+    const rect = wrapper.getBoundingClientRect()
+    const relX = clientX - rect.left
+    const plotLeft = Y_AXIS_WIDTH
+    const plotRight = rect.width - CHART_MARGIN_RIGHT
+    const plotWidth = plotRight - plotLeft
+    if (plotWidth <= 0) return null
+    const fraction = Math.max(0, Math.min(1, (relX - plotLeft) / plotWidth))
+    const data = chartDataMap[activeTab]
+    if (data.length === 0) return null
+    const minMonth = data[0].month
+    const maxMonth = data[data.length - 1].month
+    return Math.round(minMonth + fraction * (maxMonth - minMonth))
   }
 
-  function handleMouseDown(e: { activeLabel?: string | number } | null) {
-    const val = parseLabel(e?.activeLabel)
-    if (val == null) return
+  function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    // Only primary button (left-click / first touch)
+    if (e.button !== 0 && e.pointerType === 'mouse') return
+    const month = pointerXToMonth(e.clientX)
+    if (month == null) return
     isSelectingRef.current = true
-    setZoom((z) => ({ ...z, refAreaLeft: val, refAreaRight: null, isSelecting: true }))
+    e.currentTarget.setPointerCapture(e.pointerId)
+    setZoom((z) => ({ ...z, refAreaLeft: month, refAreaRight: null, isSelecting: true }))
   }
 
-  function handleMouseMove(e: { activeLabel?: string | number } | null) {
+  function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
     if (!isSelectingRef.current) return
-    const val = parseLabel(e?.activeLabel)
-    if (val == null) return
-    setZoom((z) => ({ ...z, refAreaRight: val }))
+    const month = pointerXToMonth(e.clientX)
+    if (month == null) return
+    setZoom((z) => ({ ...z, refAreaRight: month }))
+  }
+
+  function handlePointerUp() {
+    if (!isSelectingRef.current) return
+    isSelectingRef.current = false
+    setZoom((z) => {
+      const { refAreaLeft, refAreaRight } = z
+      if (refAreaLeft != null && refAreaRight != null && refAreaLeft !== refAreaRight) {
+        const [l, r] = [refAreaLeft, refAreaRight].sort((a, b) => a - b) as [number, number]
+        return { refAreaLeft: null, refAreaRight: null, isSelecting: false, domain: [l, r] }
+      }
+      return { ...z, refAreaLeft: null, refAreaRight: null, isSelecting: false }
+    })
   }
 
   function resetZoom() {
@@ -221,10 +237,8 @@ export function GrowthSection({ childId }: Props) {
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={data}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
             style={{ userSelect: "none" }}
-            margin={{ top: 5, right: 16, left: 0, bottom: 20 }}
+            margin={{ top: 5, right: CHART_MARGIN_RIGHT, left: 0, bottom: 20 }}
           >
             <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.4} />
             <XAxis
@@ -232,7 +246,7 @@ export function GrowthSection({ childId }: Props) {
               tick={{ fontSize: 11 }}
               label={{ value: "Bulan ke-", position: "insideBottomRight", offset: -5, fontSize: 11 }}
             />
-            <YAxis tick={{ fontSize: 11 }} domain={["auto", "auto"]} width={40} />
+            <YAxis tick={{ fontSize: 11 }} domain={["auto", "auto"]} width={Y_AXIS_WIDTH} />
             <Tooltip
               formatter={(value, name) => {
                 const labelMap: Record<string, string> = {
@@ -364,7 +378,19 @@ export function GrowthSection({ childId }: Props) {
                 </SelectContent>
               </Select>
             </div>
-            {renderChart(activeTab)}
+            {/* Chart wrapper handles pointer events for cross-platform zoom */}
+            <div
+              ref={chartWrapperRef}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              style={{
+                touchAction: zoom.isSelecting ? 'none' : 'pan-y',
+                cursor: 'crosshair',
+              }}
+            >
+              {renderChart(activeTab)}
+            </div>
           </Tabs>
         )}
       </CardContent>

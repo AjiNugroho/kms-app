@@ -20,7 +20,7 @@ export default function LoginPage() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm">
               <Baby className="h-5 w-5 text-white" />
             </div>
-            <span className="text-lg font-semibold text-white">KMS Digital</span>
+            <span className="text-lg font-semibold text-white">SIKAGI</span>
           </div>
         </div>
 
@@ -184,7 +184,7 @@ export default function LoginPage() {
               <Baby className="h-7 w-7 text-white" />
             </div>
             <span className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">
-              KMS Digital
+              SIKAGI
             </span>
           </div>
 
@@ -203,8 +203,7 @@ export default function LoginPage() {
 
           {/* Footer */}
           <p className="mt-10 text-center text-xs text-slate-400 dark:text-slate-600">
-            © {new Date().getFullYear()} KMS Digital &middot; Sistem Pemantauan
-            Tumbuh Kembang Anak
+            © {new Date().getFullYear()} SIKAGI &middot; Langkah Kader tingkatkan gizi balita
           </p>
         </div>
       </div>
