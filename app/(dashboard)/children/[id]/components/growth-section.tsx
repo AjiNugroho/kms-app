@@ -49,7 +49,9 @@ type ChartPoint = {
   value: number | null
   sd3neg: number
   sd2neg: number
+  sd1neg: number
   sd0: number
+  sd1: number
   sd2: number
   sd3: number
 }
@@ -60,6 +62,61 @@ const TAB_CONFIG: Record<TabKey, { label: string; unit: string; childKey: 'weigh
   weight: { label: "Berat Badan", unit: "kg", childKey: "weight" },
   height: { label: "Tinggi Badan", unit: "cm", childKey: "length" },
   head:   { label: "Lingkar Kepala", unit: "cm", childKey: "headCircumference" },
+}
+
+const TOOLTIP_LABEL: Record<string, string> = {
+  sd3:    "WHO +3SD",
+  sd2:    "WHO +2SD",
+  sd1:    "WHO +1SD",
+  sd0:    "WHO Median",
+  sd1neg: "WHO -1SD",
+  sd2neg: "WHO -2SD",
+  sd3neg: "WHO -3SD",
+  value:  "Nilai Anak",
+}
+
+type TooltipEntry = { dataKey: string; value: number | null; color: string }
+
+function ChartTooltip({
+  active,
+  payload,
+  label,
+  unit = "",
+}: {
+  active?: boolean
+  payload?: TooltipEntry[]
+  label?: number
+  unit?: string
+}) {
+  if (!active || !payload?.length) return null
+
+  const sorted = [...payload]
+    .filter((p) => p.value != null)
+    .sort((a, b) => (b.value as number) - (a.value as number))
+
+  if (sorted.length === 0) return null
+
+  return (
+    <div className="rounded-lg border bg-background px-3 py-2.5 shadow-lg">
+      <p className="mb-2 text-xs font-semibold">Bulan ke-{label}</p>
+      <div className="space-y-1.5">
+        {sorted.map((p) => (
+          <div key={p.dataKey} className="flex items-center gap-2 text-xs">
+            <span
+              className="inline-block size-2 shrink-0 rounded-full"
+              style={{ backgroundColor: p.color }}
+            />
+            <span className="text-muted-foreground">
+              {TOOLTIP_LABEL[p.dataKey] ?? p.dataKey}
+            </span>
+            <span className="ml-auto pl-4 font-mono font-semibold tabular-nums">
+              {(p.value as number).toFixed(1)} {unit}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 // Chart layout constants — must match the LineChart margin + YAxis width props below
@@ -116,13 +173,15 @@ export function GrowthSection({ childId }: Props) {
     return whoRows
       .filter((row) => row[0] <= Math.max(maxMonth, 12))
       .map((row) => ({
-        month: row[0],
-        value: childMap.get(row[0]) ?? null,
+        month:  row[0],
+        value:  childMap.get(row[0]) ?? null,
         sd3neg: row[1],
         sd2neg: row[2],
-        sd0:    row[3],
-        sd2:    row[4],
-        sd3:    row[5],
+        sd1neg: row[3],
+        sd0:    row[4],
+        sd1:    row[5],
+        sd2:    row[6],
+        sd3:    row[7],
       }))
   }
 
@@ -247,32 +306,19 @@ export function GrowthSection({ childId }: Props) {
               label={{ value: "Bulan ke-", position: "insideBottomRight", offset: -5, fontSize: 11 }}
             />
             <YAxis tick={{ fontSize: 11 }} domain={["auto", "auto"]} width={Y_AXIS_WIDTH} />
-            <Tooltip
-              formatter={(value, name) => {
-                const labelMap: Record<string, string> = {
-                  value: `Nilai Anak (${unit})`,
-                  sd3neg: "-3SD",
-                  sd2neg: "-2SD",
-                  sd0: "Median",
-                  sd2: "+2SD",
-                  sd3: "+3SD",
-                }
-                const key = String(name)
-                const label = labelMap[key] ?? key
-                if (value == null) return ["-", label] as [string, string]
-                return [`${value} ${unit}`, label] as [string, string]
-              }}
-            />
+            <Tooltip content={<ChartTooltip unit={unit} />} />
             {!isMobile && (
               <Legend
                 formatter={(value: string) => {
                   const labelMap: Record<string, string> = {
-                    value: `Nilai Anak`,
+                    value:  "Nilai Anak",
                     sd3neg: "WHO -3SD",
                     sd2neg: "WHO -2SD",
-                    sd0: "WHO Median",
-                    sd2: "WHO +2SD",
-                    sd3: "WHO +3SD",
+                    sd1neg: "WHO -1SD",
+                    sd0:    "WHO Median",
+                    sd1:    "WHO +1SD",
+                    sd2:    "WHO +2SD",
+                    sd3:    "WHO +3SD",
                   }
                   return labelMap[value] ?? value
                 }}
@@ -282,7 +328,9 @@ export function GrowthSection({ childId }: Props) {
             {/* WHO reference lines */}
             <Line type="monotone" dataKey="sd3neg" stroke="#ef4444" strokeWidth={1} strokeDasharray="4 3" dot={false} />
             <Line type="monotone" dataKey="sd2neg" stroke="#f97316" strokeWidth={1} strokeDasharray="4 3" dot={false} />
+            <Line type="monotone" dataKey="sd1neg" stroke="#eab308" strokeWidth={1} strokeDasharray="4 3" dot={false} />
             <Line type="monotone" dataKey="sd0"    stroke="#22c55e" strokeWidth={1} strokeDasharray="5 3" dot={false} />
+            <Line type="monotone" dataKey="sd1"    stroke="#eab308" strokeWidth={1} strokeDasharray="4 3" dot={false} />
             <Line type="monotone" dataKey="sd2"    stroke="#f97316" strokeWidth={1} strokeDasharray="4 3" dot={false} />
             <Line type="monotone" dataKey="sd3"    stroke="#ef4444" strokeWidth={1} strokeDasharray="4 3" dot={false} />
 

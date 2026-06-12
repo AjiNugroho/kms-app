@@ -22,7 +22,7 @@ type HeightKey = "sangat_pendek" | "pendek" | "normal" | "tinggi" | "tidak_teruk
 function classifyWeight(w: number, month: number, gender: string): WeightKey {
   const row = (gender === "laki-laki" ? W_BOYS : W_GIRLS).get(clampMonth(month))
   if (!row) return "baik"
-  const [, sd3n, sd2n, , sd2, sd3] = row
+  const [, sd3n, sd2n, , , , sd2, sd3] = row
   if (w < sd3n)        return "sangat_kurang"
   if (w < sd2n)        return "kurang"
   if (w <= sd2)        return "baik"
@@ -33,7 +33,7 @@ function classifyWeight(w: number, month: number, gender: string): WeightKey {
 function classifyHeight(h: number, month: number, gender: string): HeightKey {
   const row = (gender === "laki-laki" ? H_BOYS : H_GIRLS).get(clampMonth(month))
   if (!row) return "normal"
-  const [, sd3n, sd2n, , , sd3] = row
+  const [, sd3n, sd2n, , , , , sd3] = row
   if (h < sd3n)        return "sangat_pendek"
   if (h < sd2n)        return "pendek"
   if (h <= sd3)        return "normal"
