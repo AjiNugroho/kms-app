@@ -38,6 +38,11 @@ import { type UserShown } from "../datahooks/useUserAdminList"
 const schema = z.object({
   name: z.string().min(1, "Nama wajib diisi"),
   email: z.email("Format email tidak valid"),
+  username: z
+    .string()
+    .min(3, "Username minimal 3 karakter")
+    .regex(/^[a-zA-Z0-9_]+$/, "Hanya huruf, angka, dan underscore")
+    .or(z.literal("")),
   role: z.enum(["kader", "normaluser"]),
 })
 
@@ -57,6 +62,7 @@ export function UserEditModal({ user, open, onOpenChange }: Props) {
     defaultValues: {
       name: user.name,
       email: user.email,
+      username: user.username ?? "",
       role: user.role as FormValues["role"],
     },
   })
@@ -66,6 +72,7 @@ export function UserEditModal({ user, open, onOpenChange }: Props) {
       form.reset({
         name: user.name,
         email: user.email,
+        username: user.username ?? "",
         role: user.role as FormValues["role"],
       })
     }
@@ -74,11 +81,11 @@ export function UserEditModal({ user, open, onOpenChange }: Props) {
   const isSubmitting = form.formState.isSubmitting
 
   async function onSubmit(values: FormValues) {
+    const updateData: Record<string, string> = { name: values.name, email: values.email }
+    if (values.username) updateData.username = values.username
+
     const [updateResult, roleResult] = await Promise.all([
-      authClient.admin.updateUser({
-        userId: user.id,
-        data: { name: values.name, email: values.email },
-      }),
+      authClient.admin.updateUser({ userId: user.id, data: updateData }),
       values.role !== user.role
         ? authClient.admin.setRole({ userId: user.id, role: values.role })
         : Promise.resolve({ error: null }),
@@ -127,6 +134,19 @@ export function UserEditModal({ user, open, onOpenChange }: Props) {
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input type="email" placeholder="contoh@email.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input placeholder="contoh: kader_01" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

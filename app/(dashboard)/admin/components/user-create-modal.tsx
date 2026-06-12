@@ -40,6 +40,10 @@ import { useState } from "react"
 const schema = z.object({
   name: z.string().min(1, "Nama wajib diisi"),
   email: z.email("Format email tidak valid"),
+  username: z
+    .string()
+    .min(3, "Username minimal 3 karakter")
+    .regex(/^[a-zA-Z0-9_]+$/, "Hanya huruf, angka, dan underscore"),
   password: z.string().min(8, "Password minimal 8 karakter"),
   role: z.enum(["normaluser", "kader"]),
 })
@@ -52,7 +56,7 @@ export function UserCreateModal() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", email: "", password: "", role: "normaluser" },
+    defaultValues: { name: "", email: "", username: "", password: "", role: "normaluser" },
   })
 
   const isSubmitting = form.formState.isSubmitting
@@ -63,6 +67,7 @@ export function UserCreateModal() {
       email: values.email,
       password: values.password,
       role: values.role,
+      data: { username: values.username },
     })
 
     if (error) {
@@ -86,13 +91,13 @@ export function UserCreateModal() {
       <DialogTrigger asChild>
         <Button size="sm">
           <PlusIcon />
-          Tambah Admin
+          Tambah User
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Tambah Admin</DialogTitle>
-          <DialogDescription>Buat akun admin baru.</DialogDescription>
+          <DialogTitle>Tambah User</DialogTitle>
+          <DialogDescription>Buat akun user baru.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -117,6 +122,19 @@ export function UserCreateModal() {
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input type="email" placeholder="contoh@email.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input placeholder="contoh: kader_01" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

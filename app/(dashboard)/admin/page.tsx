@@ -1,8 +1,15 @@
+import { headers } from "next/headers"
+import { redirect } from "next/navigation"
+import { auth } from "@/lib/auth"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import React from 'react'
 import { UsersTable } from './components/users-table'
 
-const page = () => {
+export default async function AdminPage() {
+  const session = await auth.api.getSession({ headers: await headers() })
+  const role = (session?.user as { role?: string } | null)?.role
+
+  if (!session || role !== "superadmin") redirect("/")
+
   return (
     <Card>
       <CardHeader>
@@ -17,5 +24,3 @@ const page = () => {
     </Card>
   )
 }
-
-export default page

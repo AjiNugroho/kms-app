@@ -71,6 +71,11 @@ const navItems: NavItem[] = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session } = authClient.useSession()
   const user = session?.user ?? null
+  const isSuperadmin = (user as { role?: string } | null)?.role === "superadmin"
+
+  const visibleNavItems = navItems.filter(
+    (item) => item.url !== "/admin" || isSuperadmin
+  )
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -99,7 +104,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       {/* ── Navigation ── */}
       <SidebarContent>
-        <NavMain label="Menu Utama" items={navItems} />
+        <NavMain label="Menu Utama" items={visibleNavItems} />
       </SidebarContent>
 
       {/* ── User footer ── */}

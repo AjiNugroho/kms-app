@@ -7,6 +7,7 @@ export type UserShown = {
     id:string;
     name:string;
     email:string;
+    username:string|null;
     createdAt:string;
     role:string;
 }
@@ -32,6 +33,7 @@ export function useAdminListData() {
                     id:usr.id,
                     name:usr.name,
                     email:usr.email,
+                    username:(usr as { username?: string | null }).username ?? null,
                     role:usr.role||'',
                     createdAt:usr.createdAt.toISOString()
                 }

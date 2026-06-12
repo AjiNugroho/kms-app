@@ -5,22 +5,27 @@ import { usePathname } from "next/navigation"
 import {
   LayoutDashboard,
   ClipboardPlus,
-  Users,
-  TriangleAlert,
   UserCircle,
   HouseHeart,
+  Shield,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { authClient } from "@/lib/auth-client"
 
-const navItems = [
-  { label: "Beranda",   href: "/",                icon: LayoutDashboard, exact: true },
-  { label: "KMS Input", href: "/kms-input",        icon: ClipboardPlus,   exact: false },
-  { label: "Kunjungan", href: "/children-visit",    icon: HouseHeart,   exact: false },
-  { label: "Profil",    href: "/profile",           icon: UserCircle,      exact: false },
+const baseNavItems = [
+  { label: "Beranda",   href: "/",             icon: LayoutDashboard, exact: true },
+  { label: "KMS Input", href: "/kms-input",    icon: ClipboardPlus,   exact: false },
+  { label: "Kunjungan", href: "/children-visit", icon: HouseHeart,    exact: false },
+  { label: "Profil",    href: "/profile",       icon: UserCircle,      exact: false },
 ]
+
+const adminNavItem = { label: "Admin", href: "/admin", icon: Shield, exact: false }
 
 export function MobileBottomNav() {
   const pathname = usePathname()
+  const { data: session } = authClient.useSession()
+  const isSuperadmin = (session?.user as { role?: string } | null)?.role === "superadmin"
+  const navItems = isSuperadmin ? [...baseNavItems, adminNavItem] : baseNavItems
 
   function isActive(href: string, exact: boolean) {
     return exact ? pathname === href : pathname === href || pathname.startsWith(href + "/")
