@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { AlertTriangleIcon, TrendingDownIcon } from "lucide-react"
+import { AlertTriangleIcon, TrendingDownIcon, RulerIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
@@ -44,10 +44,21 @@ export type NoIncreaseChild = {
   lastWeight: number
 }
 
-function EmptyRow({ message }: { message: string }) {
+export type StuntingChild = {
+  id: string
+  name: string
+  gender: string
+  fatherName: string
+  motherName: string
+  ageMonths: number
+  lastHeight: number
+  threshold: number
+}
+
+function EmptyRow({ message, colSpan = 6 }: { message: string; colSpan?: number }) {
   return (
     <TableRow>
-      <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+      <TableCell colSpan={colSpan} className="py-10 text-center text-sm text-muted-foreground">
         {message}
       </TableCell>
     </TableRow>
@@ -165,20 +176,75 @@ function NoIncreaseTable({ data }: { data: NoIncreaseChild[] }) {
   )
 }
 
+function StuntingTable({ data }: { data: StuntingChild[] }) {
+  const router = useRouter()
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Nama Anak</TableHead>
+          <TableHead>Orang Tua</TableHead>
+          <TableHead className="text-center">L/P</TableHead>
+          <TableHead className="text-center">Usia (bln)</TableHead>
+          <TableHead className="text-center">TB Terakhir</TableHead>
+          <TableHead className="text-center">Batas WHO -2SD</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {data.length === 0 ? (
+          <EmptyRow message="Tidak ada anak dengan tinggi badan di bawah -2 SD WHO." />
+        ) : (
+          data.map((c) => (
+            <TableRow
+              key={c.id}
+              className="cursor-pointer"
+              onClick={() => router.push(`/children/${c.id}`)}
+            >
+              <TableCell className="font-medium">{c.name}</TableCell>
+              <TableCell className="text-sm text-muted-foreground">
+                {c.fatherName} / {c.motherName}
+              </TableCell>
+              <TableCell className="text-center">
+                <GenderBadge gender={c.gender} />
+              </TableCell>
+              <TableCell className="text-center">{c.ageMonths}</TableCell>
+              <TableCell className="text-center">
+                <span className="font-medium text-purple-600 dark:text-purple-400">
+                  {c.lastHeight.toFixed(1)} cm
+                </span>
+              </TableCell>
+              <TableCell className="text-center text-muted-foreground">
+                {c.threshold.toFixed(1)} cm
+              </TableCell>
+            </TableRow>
+          ))
+        )}
+      </TableBody>
+    </Table>
+  )
+}
+
 const tabOptions = [
-  { value: "bgm",         label: "BGM / Di bawah -3SD WHO",  icon: AlertTriangleIcon },
-  { value: "no-increase", label: "Tidak Naik 2 Bulan",        icon: TrendingDownIcon },
+  { value: "bgm",       label: "BGM / Di bawah -3SD WHO", icon: AlertTriangleIcon },
+  { value: "no-increase", label: "Tidak Naik 2 Bulan",    icon: TrendingDownIcon },
+  { value: "stunting",  label: "Stunting (TB < -2SD)",     icon: RulerIcon },
 ]
 
 export function VisitTables({
   bgm,
   noIncrease,
+  stunting,
 }: {
   bgm: BgmChild[]
   noIncrease: NoIncreaseChild[]
+  stunting: StuntingChild[]
 }) {
   const [tab, setTab] = useState("bgm")
-  const counts: Record<string, number> = { bgm: bgm.length, "no-increase": noIncrease.length }
+  const counts: Record<string, number> = {
+    bgm: bgm.length,
+    "no-increase": noIncrease.length,
+    stunting: stunting.length,
+  }
 
   return (
     <Tabs value={tab} onValueChange={setTab}>
@@ -226,6 +292,15 @@ export function VisitTables({
             </Badge>
           )}
         </TabsTrigger>
+        <TabsTrigger value="stunting" className="gap-2">
+          <RulerIcon className="size-3.5" />
+          Stunting (TB &lt; -2SD)
+          {stunting.length > 0 && (
+            <Badge variant="destructive" className="ml-1 text-xs">
+              {stunting.length}
+            </Badge>
+          )}
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="bgm" className="mt-4 overflow-x-auto rounded-md border">
@@ -234,6 +309,10 @@ export function VisitTables({
 
       <TabsContent value="no-increase" className="mt-4 overflow-x-auto rounded-md border">
         <NoIncreaseTable data={noIncrease} />
+      </TabsContent>
+
+      <TabsContent value="stunting" className="mt-4 overflow-x-auto rounded-md border">
+        <StuntingTable data={stunting} />
       </TabsContent>
     </Tabs>
   )

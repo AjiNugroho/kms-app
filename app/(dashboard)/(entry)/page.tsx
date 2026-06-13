@@ -10,7 +10,6 @@ import {
   ClipboardPlusIcon,
   ChartAreaIcon,
   BookOpenIcon,
-  TriangleAlertIcon,
   ChevronRightIcon,
   HouseHeartIcon,
 } from "lucide-react"
@@ -27,8 +26,8 @@ import {
 
 const WHO_WEIGHT_MINUS3SD_BOYS  = new Map(WHO_WEIGHT_BOYS.map((r) => [r[0], r[1]]))
 const WHO_WEIGHT_MINUS3SD_GIRLS = new Map(WHO_WEIGHT_GIRLS.map((r) => [r[0], r[1]]))
-const WHO_HEIGHT_MINUS3SD_BOYS  = new Map(WHO_HEIGHT_BOYS.map((r) => [r[0], r[1]]))
-const WHO_HEIGHT_MINUS3SD_GIRLS = new Map(WHO_HEIGHT_GIRLS.map((r) => [r[0], r[1]]))
+const WHO_HEIGHT_MINUS2SD_BOYS  = new Map(WHO_HEIGHT_BOYS.map((r) => [r[0], r[2]]))
+const WHO_HEIGHT_MINUS2SD_GIRLS = new Map(WHO_HEIGHT_GIRLS.map((r) => [r[0], r[2]]))
 
 async function getStats() {
   const [allChildren, allGrowth] = await Promise.all([
@@ -87,7 +86,7 @@ async function getStats() {
 
     if (hn >= 1) {
       const lastH = heightRecords[hn - 1]
-      const whoHeightMap = child.gender === "laki-laki" ? WHO_HEIGHT_MINUS3SD_BOYS : WHO_HEIGHT_MINUS3SD_GIRLS
+      const whoHeightMap = child.gender === "laki-laki" ? WHO_HEIGHT_MINUS2SD_BOYS : WHO_HEIGHT_MINUS2SD_GIRLS
       const sd3h = whoHeightMap.get(Math.min(60, Math.max(0, lastH.month)))
       if (sd3h !== undefined && lastH.h < sd3h) stunting++
     }
@@ -182,7 +181,7 @@ export default async function EntryPage() {
       bg: "bg-rose-50 dark:bg-rose-950",
     },
     {
-      label: "Stunting (TB < -3 SD)",
+      label: "Stunting (TB < -2 SD)",
       mobileLabel: "Stunting",
       value: stunting,
       icon: RulerIcon,
